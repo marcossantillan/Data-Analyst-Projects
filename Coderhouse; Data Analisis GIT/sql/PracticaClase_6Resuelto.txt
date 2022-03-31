@@ -1,0 +1,36 @@
+
+1.	Seleccionar todos los registros distintos de .
+SELECT DISTINCT * 
+   FROM base1.Estudiante;
+
+2.	Solo para esta consulta, renombrar el campo Nombre_Estudiante como Nombre y elegir aquellos cuyo nombre sea ‘Roberto’. Tambien
+mostrar el numero de legajo.
+
+SELECT Legajo_Estudiante, Nombre_Estudiante as Nombre
+   FROM base1.Estudiante 
+   WHERE   Nombre_Estudiante = 'Roberto';
+
+3.	Mostrar el nombre, apellido y numero de legajo de los estudiantes cuyo numero de legajo es mayor a ‘E2857’.
+
+SELECT DISTINCT 
+   Nombre_Estudiante as Nombre, 
+   Apellido_Estudiante, Legajo_Estudiante
+   FROM base1.Estudiante 
+   WHERE Legajo_Estudiante > 'E2857';
+
+4.	Mostrar todos los datos del estudiante cuyo numero de legajo sea E2857 y se apellide Ruiz.
+select * from base1.Estudiante
+where Legajo_Estudiante = 'E2857' and Apellido_Estudiante = 'Ruiz';
+
+5.Listar todos los datos de los estudiantes en forma ascendente.
+select * from base1.Estudiante 
+order by Nombre_Estudiante asc;
+
+6-Listar nombre, apellido y numero de legajo de los primeros 3 estudiantes matriculados.
+	
+
+select top 3 Nombre_Estudiante, Apellido_Estudiante, Legajo_Estudiante from base1.Estudiante;
+
+7-Listar los alumnos cuyo apellido sea Ruiz o Correa (uso de IN) 
+
+select * from base1.Estudiante where Apellido_Estudiante in ('Ruiz', 'Correa')

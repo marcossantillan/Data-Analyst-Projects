@@ -1,0 +1,80 @@
+USE Universidad;
+
+--LEFT
+select DNI_Estudiante, LEFT(Nombre, 3) as Ultimas_Nombre from base1.Estudiantes;
+
+select Id_Asignatura, Legajo_Profesor, left(Nombre_Asignatura,3) as Materia from base1.Asignatura;
+
+--RIGHT
+select DNI_Estudiante, RIGHT(Nombre, 3) as Ultimas_Nombre from base1.Estudiantes;
+
+--CONCAT
+
+Select DNI_Estudiante, CONCAT (Nombre,'-', Apellido) as Concatenados from base1.Estudiantes;
+
+Select Id_Asignatura, CONCAT (Nombre_Asignatura,' ', 'Plan2022') as Concatenados from base1.Asignatura;
+
+
+--REPLACE
+
+Select DNI_Estudiante, REPLACE (Nombre, 'a', 'o') as Concatenados from base1.Estudiantes;
+
+
+--UPPER/LOWER
+
+select UPPER(Nombre) FROM base1.Estudiantes;
+
+select LOWER (Nombre) FROM base1.Estudiantes;
+
+select * from base1.Estudiantes;
+--Agregue campo FechaNacimeinto a la tabla Alumnos
+alter table base1.Estudiantes
+add Fecha_Nacimiento date;
+
+--Completar campo FechaNacimiento
+
+update base1.Estudiantes set Fecha_Nacimiento = '2000-06-10' where DNI_Estudiante = 4477;
+update base1.Estudiantes set Fecha_Nacimiento = '1998-10-23' where DNI_Estudiante = 2254;
+update base1.Estudiantes set Fecha_Nacimiento = '2002-12-16' where DNI_Estudiante = 9965;
+update base1.Estudiantes set Fecha_Nacimiento = '2002-12-16' where DNI_Estudiante = 8844;
+update base1.Estudiantes set Fecha_Nacimiento = '1997-02-05' where DNI_Estudiante = 8845;
+
+select * from base1.Estudiantes;
+
+--FECHA Y TIEMPO
+--YEAR / MONTH / DAY
+
+Select Nombre, Apellido, YEAR(Fecha_Nacimiento) as Año from base1.Estudiantes;
+
+Select Nombre, Apellido, Month(Fecha_Nacimiento) as Mes from base1.Estudiantes where DNI_Estudiante = 4477;
+
+Select Nombre, Apellido, Month(Fecha_Nacimiento) as Mes from base1.Estudiantes where DNI_Estudiante = 9965;
+
+Select Nombre, Apellido, Day(Fecha_Nacimiento) as Dia from base1.Estudiantes;
+select *  from base1.Estudiantes;
+
+--DATEPART 
+Select Nombre, Apellido, DATEPART(Month,Fecha_Nacimiento) as Mes from base1.Estudiantes;
+
+Select Nombre, Apellido, DATEPART (DAY, Fecha_Nacimiento) as Dia from base1.Estudiantes;
+
+--DATENAME
+Select Nombre, Apellido, DATENAME(MONTH, Fecha_Nacimiento) as Mes from base1.Estudiantes;
+
+--DATEADD
+Select Apellido,Fecha_Nacimiento,  DATEADD(DAY, 2, Fecha_Nacimiento) as Fecha_nueva from base1.Estudiantes;
+--DATEDIFF
+ 
+Select Apellido, DATEDIFF(year,Fecha_Nacimiento,GETDATE()) as Edad FROM base1.Estudiantes;
+
+
+--CON BD DE CODERHOUSE
+--CAST
+Select CAST(Costo AS INT) as Precio from Asignaturas;
+
+--SUBCONSULTAS
+
+SELECT *
+FROM Asignaturas 
+where Area = (SELECT AreaID FROM Area WHERE Nombre like ('%Marketing%'))
+and Jornada ='Manana';

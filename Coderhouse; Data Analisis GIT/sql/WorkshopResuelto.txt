@@ -1,0 +1,250 @@
+--********INDICADORES PARA NIVEL OPERATIVO*********
+
+/*1-Análisis de docentes por camada: 
+Número de documento, nombre de docente y camada para identificar la camada mayor y la menor según el numero de la  camada. 
+Número de documento, nombre de docente y camada para identificar la camada con fecha de ingreso Mayo 2021. 
+Agregar un campo indicador que informe cuales son los registros ”mayor o menor” y los que son “Mayo 2021” 
+y ordenar el listado de menor a mayor por camada.
+*/
+select 
+t1.Documento,
+t1.nombre,
+t1.Camada,
+'Mayor' as marca
+from staff t1
+where t1.Camada = (select max(Camada) from staff)
+union
+select 
+t1.Documento,
+t1.nombre,
+t1.Camada,
+'Menor' as marca
+from staff t1
+where t1.Camada = (select min(Camada) from staff)
+UNION
+select 
+t1.Documento,
+t1.nombre,
+t1.Camada,
+'Mayo' as marca
+from staff t1
+where year([Fecha Ingreso])=2021 and month([Fecha Ingreso])=05
+order by Camada;
+
+/*2-Análisis diario de estudiantes: 
+Por medio de la fecha de ingreso de los estudiantes identificar: cantidad total de estudiantes.
+Mostrar los periodos de tiempo separados por año, mes y día, y presentar la información ordenada 
+por la fecha que mas ingresaron estudiantes.
+*/
+select 
+YEAR([Fecha Ingreso])as Año,
+Month([Fecha Ingreso])as Mes,
+Day([Fecha Ingreso])as Día,
+COUNT(EstudiantesID) as cantidad_estudiantes
+from Estudiantes 
+GROUP BY [Fecha Ingreso]
+ORDER BY [cantidad_estudiantes] DESC;
+
+/*3-Análisis de encargados con mas docentes a cargo: 
+Identificar el top 10 de los encargados que tiene más docentes a cargo, filtrar solo los que tienen a cargo docentes. 
+Ordenar de mayor a menor para poder tener el listado correctamente.
+
+*/
+SELECT top (10)
+t1.Encargado_ID,
+t1.Nombre,
+t1.Documento,
+t1.Tipo,
+count(t2.DocentesID) as cant
+  FROM Encargado t1
+  left join Staff t2 on t2.Encargado=t1.Encargado_ID 
+  where Tipo like ('%Docentes%')
+group by t1.Encargado_ID,t1.Nombre,t1.Documento, t1.Tipo
+ORDER by cant desc;
+
+select * from Encargado
+where Tipo like ('%Docentes%') ;
+select * from Staff;
+/*4-Análisis de profesiones con mas estudiantes: 
+Identificar la profesión y la cantidad de estudiantes que ejercen, mostrar el listado solo de las profesiones
+que tienen mas de 5 estudiantes.
+Ordenar de mayor a menor por la profesión que tenga mas estudiantes.
+*/
+select t1.Profesiones,
+count(t2.EstudiantesID) as cant_estudiantes
+from Profesiones t1
+left join Estudiantes t2 on t1.ProfesionesID=t2.Profesion 
+  group by t1.Profesiones
+  having count(t2.EstudiantesID) > 5
+  order by cant_estudiantes desc; 
+
+  /*5-.  Análisis de estudiantes por área de educación: 
+Identificar: nombre del área, si la asignatura es carrera o curso , a qué jornada pertenece, cantidad de estudiantes y monto total 
+del costo de la asignatura. 
+Ordenar el informe de mayor a menor por monto de costos total tener en cuenta los docentes que no tienen asignaturas 
+ni estudiantes asignados, también sumarlos.
+*/
+ select 
+ t2.Nombre,
+ t1.Tipo,
+ t1.Jornada,
+ COUNT(t4.EstudiantesID) AS Cantidad_Estudiantes,
+ SUM(t1.Costo) as costo_Total 
+ from Asignaturas t1 
+ inner join Area t2 on t1.Area=t2.AreaID
+ left join Staff t3 on t3.Asignatura=t1.AsignaturasID
+ left join Estudiantes t4 on t3.DocentesID=t4.Docente
+ group by t2.Nombre,t1.Tipo,t1.Jornada
+ order by costo_Total desc;
+
+
+
+ --**************NIVEL TÁCTICO***********************
+ /*1-Análisis mensual de estudiantes por área: 
+Identificar para cada área: el año y el mes (concatenados en formato YYYYMM), cantidad de estudiantes y monto total de las asignaturas.
+Ordenar por mes del más actual al más antiguo y por cantidad de clientes de mayor a menor.
+*/
+
+select t4.Nombre,
+CONVERT(nvarchar(6),T1.[Fecha Ingreso],112) AS YYYYMM,
+COUNT(t1.EstudiantesID) cantidad,
+SUM(t3.Costo) as Total
+from Estudiantes t1
+inner join Staff t2 on t1.Docente=t2.DocentesID
+inner join Asignaturas t3 on t2.Asignatura=t3.AsignaturasID
+inner join Area t4 on t3.Area=t4.AreaID
+GROUP BY T4.Nombre, CONVERT(nvarchar(6),T1.[Fecha Ingreso],112)
+ORDER BY YYYYMM DESC, cantidad DESC;
+
+select t4.Nombre,
+concat (YEAR(T1.[Fecha Ingreso]),'-',MONTH(T1.[Fecha Ingreso])) as  YYYYMM,
+COUNT(t1.EstudiantesID) cantidad,
+SUM(t3.Costo) as Total
+from Estudiantes t1
+inner join Staff t2 on t1.Docente=t2.DocentesID
+inner join Asignaturas t3 on t2.Asignatura=t3.AsignaturasID
+inner join Area t4 on t3.Area=t4.AreaID
+GROUP BY T4.Nombre, concat(YEAR(T1.[Fecha Ingreso]),'-', MONTH(T1.[Fecha Ingreso]))  
+ORDER BY YYYYMM DESC, cantidad DESC;
+
+/*2-Análisis encargado tutores jornada noche: 
+Identificar el nombre del encargado, el documento, el numero de la camada(solo el numero) y la fecha de ingreso del tutor.
+Ordenar por camada de forma mayor a menor.
+*/
+SELECT 
+t1.nombre,
+t1.Documento,
+right(t2.Camada,5) as camada,
+t2.[Fecha Ingreso] as FechaIngresoTutor
+FROM Encargado t1
+inner JOIN Staff t2 on t1.Encargado_ID=t2.Encargado
+inner join Asignaturas t3 on t3.AsignaturasID=t2.Asignatura
+where t3.Jornada='Noche'
+and t1.Tipo like '%Tutores%'
+
+/*3-Análisis asignaturas sin docentes o tutores: 
+Identificar el tipo de asignatura, la jornada, la cantidad de áreas únicas y la cantidad total de asignaturas que no tienen asignadas docentes o tutores.
+Ordenar por tipo de forma descendente. 
+*/
+SELECT 
+t1.Tipo,
+t1.jornada,
+count(distinct t1.area) as cant_areas,
+count(t1.nombre) as cant_asignaturas
+FROM Asignaturas t1
+left join staff t2 on t1.AsignaturasID=t2.Asignatura
+where DocentesID is null
+group by t1.Tipo, t1.Jornada
+order by t1.tipo desc
+
+select * from Asignaturas;
+/*4-Análisis asignaturas mayor al promedio: 
+Identificar el nombre de la asignatura, el costo de la asignatura y el promedio del costo de las asignaturas por área. 
+Una vez obtenido el dato, del promedio se debe visualizar solo las carreras que se encuentran por encima del promedio. 
+*/
+select 
+t1.Nombre,
+t1.Costo,
+t2.avgcosto
+from Asignaturas t1,
+    (select Nombre,avg(Costo) avgcosto
+        from  Asignaturas 
+        group by Nombre) t2       
+where t1.Nombre=t2.Nombre
+and t1.Costo>t2.avgcosto        
+
+/*5-Análisis aumento de salario docentes: 
+Identificar el nombre, documento, el área, la asignatura y el aumento del salario del docente, este ultimo calcularlo sacándole
+un porcentaje al costo de la asignatura, todos las áreas tienen un porcentaje distinto, Marketing-17%, Diseño-20%, Programacion-23%, 
+Producto-13%, Data-15%, Herramientas 8%
+Nota: para el ejercicio 5, los dos indicadores deben encontrarse en el mismo reporte, identificar si es necesario unificar
+o reunir la consulta SQL.
+*/
+
+select 
+t1.Nombre,
+t1.Documento,
+t3.Nombre as area,
+t2.Nombre as asignaturas,
+cast((costo * 0.17)as decimal(7,3)) as Salario
+from Staff t1
+left join Asignaturas t2 on t1.Asignatura=t2.AsignaturasID
+inner join area t3 on t2.Area=t3.AreaID
+where t3.Nombre like ('%Marketing%')    
+union
+select 
+t1.Nombre,
+t1.Documento,
+t3.Nombre as area,
+t2.Nombre as asignaturas,
+cast((costo * 0.20)as decimal(7,3)) as Salario
+from Staff t1
+left join Asignaturas t2 on t1.Asignatura=t2.AsignaturasID
+inner join area t3 on t2.Area=t3.AreaID
+where t3.Nombre like ('%Diseño%')
+union
+select 
+t1.Nombre,
+t1.Documento,
+t3.Nombre as area,
+t2.Nombre as asignaturas,
+cast((costo * 0.23)as decimal(7,3)) as Salario
+from Staff t1
+left join Asignaturas t2 on t1.Asignatura=t2.AsignaturasID
+inner join area t3 on t2.Area=t3.AreaID
+where t3.Nombre like ('%Programación%') 
+union
+select 
+t1.Nombre,
+t1.Documento,
+t3.Nombre as area,
+t2.Nombre as asignaturas,
+cast((costo * 0.13)as decimal(7,3)) as Salario
+from Staff t1
+left join Asignaturas t2 on t1.Asignatura=t2.AsignaturasID
+inner join area t3 on t2.Area=t3.AreaID
+where t3.Nombre like ('%Producto%')
+union
+select 
+t1.Nombre,
+t1.Documento,
+t3.Nombre as area,
+t2.Nombre as asignaturas,
+cast((costo * 0.15)as decimal(7,3)) as Salario
+from Staff t1
+left join Asignaturas t2 on t1.Asignatura=t2.AsignaturasID
+inner join area t3 on t2.Area=t3.AreaID
+where t3.Nombre like ('%Data%') 
+union
+select 
+t1.Nombre,
+t1.Documento,
+t3.Nombre as area,
+t2.Nombre as asignaturas,
+cast((costo * 0.8)as decimal(7,3)) as Salario
+from Staff t1
+left join Asignaturas t2 on t1.Asignatura=t2.AsignaturasID
+inner join area t3 on t2.Area=t3.AreaID
+where t3.Nombre like ('%Herramientas%');   
+
+

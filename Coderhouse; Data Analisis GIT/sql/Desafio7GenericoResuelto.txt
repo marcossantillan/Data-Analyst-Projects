@@ -1,0 +1,98 @@
+--1.Indicar cuantos cursos y carreras  tiene el área de Data. Renombrar la nueva columna como cant_asignaturas. 
+--Keywords: Tipo, Área, Asignaturas.
+
+SELECT 
+tipo,
+count(Area)as cant_asignaturas
+FROM Asignaturas
+where Area=5
+GROUP by Tipo;
+
+--2 Se requiere saber cual es el nombre, el documento y el teléfono de los estudiantes que son profesionales en agronomía 
+--y que nacieron entre el año 1970 y el año 2000. Keywords: Estudiantes, Profesión, fecha de Nacimiento
+
+
+SELECT 
+Nombre,
+Documento,
+Telefono
+FROM Estudiantes
+where Profesion = '6'
+and [Fecha de Nacimiento] BETWEEN '1970-01-01' AND '2000-12-31';
+
+--3 Se requiere un listado de los docentes que ingresaron en el año 2021 y concatenar los campos nombre y apellido. 
+--El resultado debe utilizar un separador: guión (-). Ejemplo: Elba-Jimenez. Renombrar la nueva columna como 
+--Nombres_Apellidos. Los resultados de la nueva columna deben estar en mayúsculas. Keywords: Staff, Fecha Ingreso, 
+--Nombre, Apellido.
+SELECT 
+upper(CONCAT(Nombre,'-',Apellido)) as Nombres_Apellidos
+from staff
+where year([Fecha Ingreso]) =2021;
+
+--4 Indicar la cantidad de encargados de docentes y de tutores. 
+--Renombrar la columna como CantEncargados. Quitar la palabra ”Encargado ”en cada uno de los registros. 
+--Renombrar la columna como NuevoTipo. Keywords: Encargado, tipo, Encargado_ID.
+SELECT 
+replace(Tipo,'Encargado ','')AS NuevoTipo,
+count(Encargado_ID) as CantEncargados
+FROM [Encargado]
+group by tipo
+
+--5-Indicar cual es el precio promedio de las carreras y los cursos por jornada. 
+--Renombrar la nueva columna como Promedio. 
+--Ordenar los promedios de Mayor a menor Keywords: Tipo, Jornada, Asignaturas. 
+SELECT 
+Tipo,
+Jornada,
+AVG(Costo) as Promedio
+FROM [Asignaturas]
+group by Tipo,Jornada
+order by Promedio desc
+
+--6 Se requiere calcular la edad de los estudiantes en una nueva columna. 
+--Renombrar a la nueva columna Edad. Filtrar solo los que son mayores de 18 años. 
+--Ordenar de Menor a Mayor Keywords: Fecha de Nacimiento, Estudiantes.
+SELECT Nombre, Apellido,
+DATEDIFF(year,[Fecha de Nacimiento],GETDATE()) as Edad
+FROM Estudiantes
+where DATEDIFF(year,[Fecha de Nacimiento],GETDATE())>=18
+order by Edad asc
+
+--7 Se requiere saber el Nombre,el correo, la camada y la fecha de ingreso de personas del staff que contienen correo .edu 
+--y su DocenteID se mayor o igual que 100 Keywords: Staff, correo, DocentesID
+SELECT Nombre,
+correo,
+Camada,
+[Fecha Ingreso]  
+FROM Staff
+where correo like('%.edu%') and DocentesID>=100
+
+--8 Se requiere conocer el documento, el domicilio el código postal y el nombre de los primeros estudiantes 
+--que se registraron en la plataforma. Keywords: Documento, Estudiantes, Fecha Ingreso.
+SELECT 
+Documento,
+Domicilio,
+[Codigo Postal],
+Nombre
+FROM Estudiantes
+where [Fecha Ingreso] = (select Min([Fecha Ingreso]) as fechamin from Estudiantes)
+
+-- 9- Indicar el nombre, apellido y documento de los docentes y tutores que tienen asignaturas “UX” . 
+--Keywords: Staff, Asignaturas, Nombre, Apellido.
+SELECT 
+Nombre,
+Apellido,
+documento
+FROM Staff
+where Asignatura in (SELECT AsignaturasID FROM Asignaturas where nombre like('%UX%'))
+
+--10- Se desea calcular el 25% de aumento para las asignaturas del área de marketing de la jornada mañana se deben traer 
+--todos los campos, mas el de los cálculos correspondientes el porcentaje y el Nuevo costo debe estar en decimal 
+--con 3 digitos. Renombrar el calculo del porcentaje con el nombre porcentaje y la suma del costo mas el porcentaje 
+--por NuevoCosto. Keywords: Asignaturas, Costo, Área, Jornada, Nombre
+
+SELECT *, cast((costo * 0.25)as decimal(7,3)) as porcentaje,
+Costo+cast((costo * 0.25)as decimal(7,3)) as NuevoCosto
+FROM Asignaturas 
+where Area = (SELECT AreaID FROM Area WHERE Nombre like ('%Marketing%'))
+and Jornada ='Manana';

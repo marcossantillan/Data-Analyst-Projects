@@ -1,0 +1,52 @@
+--CREO LA BASE DE DATOS TIENDA
+CREATE DATABASE tienda;
+
+USE tienda;
+
+--CREAMOS EL ESQUEMA
+CREATE SCHEMA sucursal1;
+
+CREATE TABLE clientes(
+id_cliente INT IDENTITY PRIMARY KEY, --- creacion clave primaria
+dni INT NOT NULL,
+nombre VARCHAR(200) NOT NULL,
+apellido VARCHAR(200) NOT NULL,
+telefono INT NOT NULL);
+
+CREATE TABLE vendedor(
+id_vendedor INT IDENTITY PRIMARY KEY,
+dni INT NOT NULL,
+nombre VARCHAR(200) NOT NULL,
+apellido VARCHAR(200) NOT NULL,
+fecha_ingreso DATE); 
+
+CREATE TABLE proveedor(
+id_proveedor INT IDENTITY PRIMARY KEY, 
+nombre VARCHAR(200) NOT NULL,
+domicilio VARCHAR(200) NOT NULL); 
+
+CREATE TABLE productos(
+id_producto INT IDENTITY PRIMARY KEY, 
+nombre VARCHAR(200) NOT NULL,
+descripcion TEXT, 
+id_proveedores INT FOREIGN KEY REFERENCES proveedor(id_proveedor));
+
+CREATE TABLE facturas(
+letra CHAR(3) NOT NULL,
+numero INT NOT NULL,
+id_cliente INT FOREIGN KEY REFERENCES clientes(id_cliente), --- creacion clave foranea
+id_producto INT FOREIGN KEY REFERENCES productos(id_producto), --- creacion clave foranea
+fecha DATE NOT NULL,
+monto decimal(6,2),
+PRIMARY KEY(letra,numero));
+
+--CARGAR DATOS EN LA TABLA CLIENTES
+
+INSERT INTO clientes(dni, nombre, Apellido,Telefono)
+VALUES (1234, 'Ariel', 'Gomez', 23456);
+
+INSERT INTO clientes VALUES (1237, 'Ana', 'Ruiz', 23458);
+
+SELECT * FROM clientes;
+
+DROP TABLE facturas;
